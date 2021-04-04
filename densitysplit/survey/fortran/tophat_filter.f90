@@ -64,7 +64,7 @@ program tophat_filter
   real*8, dimension(3) :: r
   real*8, allocatable, dimension(:,:)  :: tracers, randoms, centres
   real*8, dimension(:), allocatable :: DD, RR, delta
-  real*8, dimension(:), allocatable :: weights_data, weights_randoms
+  real*8, dimension(:), allocatable :: weights_tracers, weights_randoms
 
   logical :: debug = .true.
   
@@ -136,15 +136,15 @@ program tophat_filter
   read(10) nrows
   read(10) ncols
   allocate(tracers(ncols, nrows))
-  allocate(weights_data(nrows))
+  allocate(weights_tracers(nrows))
   read(10) tracers
   close(10)
   ng = nrows
   if (ncols .eq. 4) then
-    weights_data = tracers(4, :)
+    weights_tracers = tracers(4, :)
     if (debug) write(*,*) 'Tracer file has weight information.'
   else
-    weights_data = 1.0
+    weights_tracers = 1.0
   end if
   if (debug) then
     write(*,*) 'ntracers dim: ', size(tracers, dim=1), size(tracers, dim=2)
@@ -206,7 +206,9 @@ program tophat_filter
     write(*, *) 'Maximum number of threads: ', OMP_GET_MAX_THREADS()
   end if
 
-  !$OMP PARALLEL DO DEFAULT(PRIVATE) SHARED(DD, RR)
+  !$OMP PARALLEL DO DEFAULT(PRIVATE) SHARED(tracers, randoms, &
+  !$OMP& centres, DD, RR, ll_tracers, ll_randoms, weights_tracers, &
+  !$OMP& weights_randoms, lirst_tracers, lirst_randoms)
   do i = 1, nc
     ipx = int((centres(1, i) - gridmin) / rgrid + 1.)
     ipy = int((centres(2, i) - gridmin) / rgrid + 1.)
@@ -230,7 +232,7 @@ program tophat_filter
               dis = norm2(r)
 
               if (dis .gt. dmin .and. dis .lt. dmax) then
-                DD(i) = DD(i) + weights_data(ii)
+                DD(i) = DD(i) + weights_tracers(ii)
               end if
   
               if(ii.eq.lirst_tracers(ix, iy, iz)) exit
