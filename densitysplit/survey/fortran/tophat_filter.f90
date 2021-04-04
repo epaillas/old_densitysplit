@@ -56,7 +56,7 @@ program tophat_filter
   integer*8 :: nrows, ncols
   integer*8 :: ipx, ipy, ipz, ndif
   integer*8 :: ngrid
-  integer*4 :: nthreads
+  integer*4 :: nthreads, threadid
   integer*8, dimension(:, :, :), allocatable :: lirst_tracers, lirst_randoms
 
   integer*8, dimension(:), allocatable :: ll_tracers, ll_randoms
@@ -66,7 +66,7 @@ program tophat_filter
   real*8, dimension(:), allocatable :: DD, RR, delta
   real*8, dimension(:), allocatable :: weights_tracers, weights_randoms
 
-  logical :: debug = .true.
+  logical :: debug = .false.
   
   character(20), external :: str
   character(len=500) :: input_tracers, input_centres, input_randoms, output_filter
@@ -206,13 +206,15 @@ program tophat_filter
     write(*, *) 'Maximum number of threads: ', OMP_GET_MAX_THREADS()
   end if
 
-  !$OMP PARALLEL DO DEFAULT(PRIVATE) SHARED(tracers, randoms, &
-  !$OMP& centres, DD, RR, ll_tracers, ll_randoms, weights_tracers, &
-  !$OMP& weights_randoms, lirst_tracers, lirst_randoms)
+  !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(i, ipx, ipy, ipz, &
+  !$OMP& ix, iy, iz, ii, disx, disy, disz, r, dis, threadid)
   do i = 1, nc
     ipx = int((centres(1, i) - gridmin) / rgrid + 1.)
     ipy = int((centres(2, i) - gridmin) / rgrid + 1.)
     ipz = int((centres(3, i) - gridmin) / rgrid + 1.)
+
+    threadid = OMP_get_thread_num()
+    write(*,*) i, threadid
 
     ! loop over cells around each centre
     do ix = ipx - ndif, ipx + ndif, 1
