@@ -66,7 +66,7 @@ program tophat_filter
   real*8, dimension(:), allocatable :: DD, RR, delta
   real*8, dimension(:), allocatable :: weights_data, weights_randoms
 
-  logical :: debug = .false.
+  logical :: debug = .true.
   
   character(20), external :: str
   character(len=500) :: input_tracers, input_centres, input_randoms, output_filter
@@ -202,9 +202,9 @@ program tophat_filter
   ndif = int(dmax / rgrid + 1.)
 
   call OMP_SET_NUM_THREADS(nthreads)
-  write(*, *) 'Maximum number of threads: ', OMP_GET_MAX_THREADS()
-
-  stop
+  if (debug) then
+    write(*, *) 'Maximum number of threads: ', OMP_GET_MAX_THREADS()
+  end if
 
   !$OMP PARALLEL DO DEFAULT(PRIVATE) SHARED(DD, RR)
   do i = 1, nc
