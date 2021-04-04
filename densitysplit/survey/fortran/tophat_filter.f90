@@ -213,8 +213,8 @@ program tophat_filter
     ipy = int((centres(2, i) - gridmin) / rgrid + 1.)
     ipz = int((centres(3, i) - gridmin) / rgrid + 1.)
 
-    threadid = OMP_get_thread_num()
-    write(*,*) i, threadid
+    !threadid = OMP_get_thread_num()
+    !write(*,*) i, threadid
 
     ! loop over cells around each centre
     do ix = ipx - ndif, ipx + ndif, 1
