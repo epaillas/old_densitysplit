@@ -202,6 +202,7 @@ program tophat_filter
   ndif = int(dmax / rgrid + 1.)
 
   call OMP_SET_NUM_THREADS(nthreads)
+  write(*, *) 'Max number of threads: ', OMP_GET_MAX_THREADS()
 
   !$OMP PARALLEL DO DEFAULT(PRIVATE) SHARED(DD, RR)
   do i = 1, nc
