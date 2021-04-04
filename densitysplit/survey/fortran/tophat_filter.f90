@@ -56,8 +56,7 @@ program tophat_filter
   integer*8 :: nrows, ncols
   integer*8 :: ipx, ipy, ipz, ndif
   integer*8 :: ngrid
-  integer*4 :: num_threads, thread_num
-  
+  integer*4 :: nthreads
   integer*8, dimension(:, :, :), allocatable :: lirst_tracers, lirst_randoms
 
   integer*8, dimension(:), allocatable :: ll_tracers, ll_randoms
@@ -72,9 +71,9 @@ program tophat_filter
   character(20), external :: str
   character(len=500) :: input_tracers, input_centres, input_randoms, output_filter
   character(len=10) :: dmax_char, dmin_char, gridmin_char, gridmax_char
-  character(len=10) :: ngrid_char, rfilter_char
+  character(len=10) :: ngrid_char, rfilter_char, nthreads_char
   
-  if (iargc() .ne. 10) then
+  if (iargc() .ne. 11) then
     write(*,*) 'Some arguments are missing.'
     write(*,*) '1) input_tracers'
     write(*,*) '2) input_centres'
@@ -86,6 +85,7 @@ program tophat_filter
     write(*,*) '8) ngrid'
     write(*,*) '9) gridmin'
     write(*,*) '10) gridmax'
+    write(*,*) '11) nthreads'
     write(*,*) ''
     stop
   end if
@@ -101,6 +101,7 @@ program tophat_filter
   call getarg(8, ngrid_char)
   call getarg(9, gridmin_char)
   call getarg(10, gridmax_char)
+  call getarg(11, nthreads_char)
   
   ! convert string arguments to corresponding data types
   read(dmin_char, *) dmin
@@ -109,6 +110,8 @@ program tophat_filter
   read(ngrid_char, *) ngrid
   read(gridmin_char, *) gridmin
   read(gridmax_char, *) gridmax
+  read(nthreads_char, *) nthreads
+
   
   if (debug) then
     write(*,*) '-----------------------'
@@ -124,6 +127,7 @@ program tophat_filter
     write(*, *) 'ngrid: ', trim(ngrid_char)
     write(*, *) 'gridmin: ', trim(gridmin_char), 'Mpc'
     write(*, *) 'gridmax: ', trim(gridmax_char), 'Mpc'
+    write(*, *) 'nthreads: ', trim(nthreads_char)
     write(*,*) ''
   end if
 
@@ -196,6 +200,8 @@ program tophat_filter
   RR = 0
   delta = 0
   ndif = int(dmax / rgrid + 1.)
+
+  call OMP_SET_NUM_THREADS(nthreads)
 
   !$OMP PARALLEL DO DEFAULT(PRIVATE) SHARED(DD, RR)
   do i = 1, nc
