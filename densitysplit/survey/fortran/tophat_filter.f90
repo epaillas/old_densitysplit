@@ -206,6 +206,8 @@ program tophat_filter
     write(*, *) 'Maximum number of threads: ', OMP_GET_MAX_THREADS()
   end if
 
+  write(*,*) maxval (weights_randoms), maxval(weights_tracers)
+
   !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(i, ipx, ipy, ipz, &
   !$OMP& ix, iy, iz, ii, disx, disy, disz, r, dis, threadid)
   do i = 1, nc
@@ -214,7 +216,6 @@ program tophat_filter
     ipz = int((centres(3, i) - gridmin) / rgrid + 1.)
 
     !threadid = OMP_get_thread_num()
-    !write(*,*) i, threadid
 
     ! loop over cells around each centre
     do ix = ipx - ndif, ipx + ndif, 1
@@ -267,10 +268,12 @@ program tophat_filter
       end do
     end do
     ! normalize random counts
-    RR = RR / (nr * 1./ng)
+    RR(i) = RR(i) / (nr * 1./ng)
 
     ! calculate density
     delta(i) = DD(i) / RR(i) - 1
+
+    !write(*,*) RR(i), threadid, i
 
   end do
   !$OMP END PARALLEL DO
