@@ -63,7 +63,8 @@ def filtered_density(
   tracers_filename, centres_filename, randoms_filename,
   output_filename, filter_type, filter_size,
   ngrid, gridmin, gridmax,
-  dmin, dmax, output_format='unformatted'
+  dmin, dmax, output_format='unformatted',
+  nthreads=1
 ):
 
   if dmax == None:
@@ -79,7 +80,7 @@ def filtered_density(
     binpath, tracers_filename, centres_filename,
     randoms_filename, output_filename, str(dmin),
     str(dmax), str(filter_size), str(ngrid),
-    str(gridmin), str(gridmax)
+    str(gridmin), str(gridmax), str(nthreads)
   ]
 
   subprocess.call(cmd)
