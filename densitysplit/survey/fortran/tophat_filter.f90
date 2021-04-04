@@ -204,6 +204,8 @@ program tophat_filter
   call OMP_SET_NUM_THREADS(nthreads)
   write(*, *) 'Maximum number of threads: ', OMP_GET_MAX_THREADS()
 
+  stop
+
   !$OMP PARALLEL DO DEFAULT(PRIVATE) SHARED(DD, RR)
   do i = 1, nc
     ipx = int((centres(1, i) - gridmin) / rgrid + 1.)
