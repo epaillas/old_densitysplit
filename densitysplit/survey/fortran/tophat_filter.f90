@@ -112,7 +112,7 @@ program tophat_filter
   read(gridmax_char, *) gridmax
   read(nthreads_char, *) nthreads
 
-  
+
   if (debug) then
     write(*,*) '-----------------------'
     write(*,*) 'Running tophat_filter.exe'
@@ -202,7 +202,7 @@ program tophat_filter
   ndif = int(dmax / rgrid + 1.)
 
   call OMP_SET_NUM_THREADS(nthreads)
-  write(*, *) 'Max number of threads: ', OMP_GET_MAX_THREADS()
+  write(*, *) 'Maximum number of threads: ', OMP_GET_MAX_THREADS()
 
   !$OMP PARALLEL DO DEFAULT(PRIVATE) SHARED(DD, RR)
   do i = 1, nc
