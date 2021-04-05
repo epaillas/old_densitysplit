@@ -104,8 +104,8 @@ def filtered_density(
 
 
 def split_centres(
-  centres_filename, filter_filename, handle,
-  quantiles, output_format='unformatted'
+  centres_filename, filter_filename, quantiles,
+  handle=None, output_format='unformatted'
 ):
 
   # read centres
