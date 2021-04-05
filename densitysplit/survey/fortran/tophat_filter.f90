@@ -57,6 +57,7 @@ program tophat_filter
   integer*8 :: ipx, ipy, ipz, ndif
   integer*8 :: ngrid
   integer*4 :: nthreads, threadid
+  integer*8 :: end, beginning, rate
   integer*8, dimension(:, :, :), allocatable :: lirst_tracers, lirst_randoms
 
   integer*8, dimension(:), allocatable :: ll_tracers, ll_randoms
@@ -89,6 +90,8 @@ program tophat_filter
     write(*,*) ''
     stop
   end if
+
+  call system_clock(beginning, rate)
 
   ! read arguments from command line
   call getarg(1, input_tracers)
@@ -282,6 +285,11 @@ program tophat_filter
   open(12, file=output_filter, status='replace', form='unformatted')
   write(12) nc
   write(12) delta
+
+  call system_clock(end)
+  if (debug) then
+    print *, "Elapsed time: ", real(end - beginning) / real(rate)
+  end if
 
   end program tophat_filter
   
