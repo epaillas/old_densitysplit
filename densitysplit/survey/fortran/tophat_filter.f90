@@ -67,7 +67,7 @@ program tophat_filter
   real*8, dimension(:), allocatable :: DD, RR, delta
   real*8, dimension(:), allocatable :: weights_tracers, weights_randoms
 
-  logical :: debug = .false.
+  logical :: debug = .true.
   
   character(20), external :: str
   character(len=500) :: input_tracers, input_centres, input_randoms, output_filter
