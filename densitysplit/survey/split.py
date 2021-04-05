@@ -170,7 +170,7 @@ def split_centres(
         f.write_record(cout)
         f.close()
       
-      if output_format == 'ascii':
+      elif output_format == 'ascii':
         output_filename += '.dat'
         np.savetxt(output_filename, cout)
 
