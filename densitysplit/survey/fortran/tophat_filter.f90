@@ -209,8 +209,6 @@ program tophat_filter
     write(*, *) 'Maximum number of threads: ', OMP_GET_MAX_THREADS()
   end if
 
-  write(*,*) maxval (weights_randoms), maxval(weights_tracers)
-
   !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(i, ipx, ipy, ipz, &
   !$OMP& ix, iy, iz, ii, disx, disy, disz, r, dis, threadid)
   do i = 1, nc

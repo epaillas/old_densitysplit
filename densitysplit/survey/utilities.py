@@ -17,8 +17,10 @@ def fits_to_unformatted(
   y = dist * np.sin(cat['DEC'] * np.pi / 180) * np.sin(cat['RA'] * np.pi / 180)
   z = dist * np.cos(cat['DEC'] * np.pi / 180)
 
+  weight = cat['WEIGHT_FKP'] * cat['WEIGHT_SYSTOT']
+
   # write result to output file
-  cout = np.c_[x, y, z]
+  cout = np.c_[x, y, z, weight]
   nrows, ncols = np.shape(cout)
   f = FortranFile(output_filename, 'w')
   nrows, ncols = np.shape(cout)
