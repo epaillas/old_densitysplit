@@ -49,20 +49,20 @@ program tophat_filter
   implicit none
   
   real*8 :: rgrid, rfilter, gridmax, gridmin
-  real*8 :: disx, disy, disz, dis, dmax, dmin
+  real*8 :: disx, disy, disz, dis2
+  real*8 :: dmin, dmax, dmin2, dmax2
   
   integer*8 :: ng, nc, nr
   integer*8 :: i, ii, ix, iy, iz
   integer*8 :: nrows, ncols
   integer*8 :: ipx, ipy, ipz, ndif
   integer*8 :: ngrid
-  integer*4 :: nthreads, threadid
+  integer*4 :: nthreads
   integer*8 :: end, beginning, rate
   integer*8, dimension(:, :, :), allocatable :: lirst_tracers, lirst_randoms
 
   integer*8, dimension(:), allocatable :: ll_tracers, ll_randoms
   
-  real*8, dimension(3) :: r
   real*8, allocatable, dimension(:,:)  :: tracers, randoms, centres
   real*8, dimension(:), allocatable :: DD, RR, delta
   real*8, dimension(:), allocatable :: weights_tracers, weights_randoms
@@ -231,11 +231,10 @@ program tophat_filter
               disx = tracers(1, ii) - centres(1, i)
               disy = tracers(2, ii) - centres(2, i)
               disz = tracers(3, ii) - centres(3, i)
- 
-              r = (/ disx, disy, disz /)
-              dis = norm2(r)
 
-              if (dis .gt. dmin .and. dis .lt. dmax) then
+              dis2 = disx * disx + disy * disy + disz * disz
+
+              if (dis2 .gt. dmin2 .and. dis2 .lt. dmax2) then
                 DD(i) = DD(i) + weights_tracers(ii)
               end if
   
@@ -253,10 +252,9 @@ program tophat_filter
               disy = randoms(2, ii) - centres(2, i)
               disz = randoms(3, ii) - centres(3, i)
  
-              r = (/ disx, disy, disz /)
-              dis = norm2(r)
+              dis2 = disx * disx + disy * disy + disz * disz
 
-              if (dis .gt. dmin .and. dis .lt. dmax) then
+              if (dis2 .gt. dmin2 .and. dis2 .lt. dmax2) then
                 RR(i) = RR(i) + weights_randoms(ii)
               end if
   
