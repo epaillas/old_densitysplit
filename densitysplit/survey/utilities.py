@@ -5,7 +5,8 @@ from astropy.io import fits
 import argparse
 
 def fits_to_unformatted(
-  input_filename, output_filename, cosmology
+  input_filename, output_filename, cosmology,
+  is_random=False
 ):
   # open fits file
   with fits.open(input_filename) as hdul:
@@ -17,7 +18,10 @@ def fits_to_unformatted(
   y = dist * np.sin(cat['DEC'] * np.pi / 180) * np.sin(cat['RA'] * np.pi / 180)
   z = dist * np.cos(cat['DEC'] * np.pi / 180)
 
-  weight = cat['WEIGHT_FKP'] * cat['WEIGHT_SYSTOT']
+  if is_random:
+    weight = cat['WEIGHT_FKP']
+  else:
+    weight = cat['WEIGHT_FKP'] * cat['WEIGHT_SYSTOT']
 
   # write result to output file
   cout = np.c_[x, y, z, weight]
