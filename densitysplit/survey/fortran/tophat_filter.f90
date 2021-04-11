@@ -73,7 +73,8 @@ program tophat_filter
   character(len=500) :: input_tracers, input_centres, input_randoms, output_filter
   character(len=10) :: dmax_char, dmin_char, gridmin_char, gridmax_char
   character(len=10) :: ngrid_char, rfilter_char, nthreads_char
-  
+  character(len=10) :: estimator = 'DP'
+
   if (iargc() .ne. 11) then
     write(*,*) 'Some arguments are missing.'
     write(*,*) '1) input_tracers'
@@ -262,20 +263,23 @@ program tophat_filter
   
             end do
           end if
-
         end do
       end do
     end do
-    ! normalize random counts
-    RR(i) = RR(i) / (nr * 1./ng)
-
-    ! calculate density
-    delta(i) = DD(i) / RR(i) - 1
-
-    !write(*,*) RR(i), threadid, i
-
   end do
   !$OMP END PARALLEL DO
+
+  ! Normalize data and random counts
+  DD = DD / SUM(weights_tracers)
+  RR = RR / SUM(weights_randoms)
+
+  ! Calculate density contrast
+  if (estimator .eq. 'DP') then
+    delta = DD / RR - 1
+  else
+    write(*,*) 'Estimator for the correlation function was not recognized.'
+    stop
+  end if
   
   ! write output  
   open(12, file=output_filter, status='replace', form='unformatted')
