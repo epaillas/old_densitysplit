@@ -269,6 +269,7 @@ program tophat_filter
   end do
   !$OMP END PARALLEL DO
 
+  write(*,* )SUM(weights_tracers), SUM(weights_randoms)
   ! Normalize data and random counts
   DD = DD / SUM(weights_tracers)
   RR = RR / SUM(weights_randoms)
