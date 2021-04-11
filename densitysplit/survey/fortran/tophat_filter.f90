@@ -177,7 +177,7 @@ program tophat_filter
   close(11)
   nr = nrows
   if (ncols .eq. 4) then
-    weights_randoms = tracers(4, :)
+    weights_randoms = randoms(4, :)
     if (debug) write(*,*) 'Tracer file has weight information.'
   else
     weights_randoms = 1.0
