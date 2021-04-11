@@ -21,7 +21,7 @@ def fits_to_unformatted(
   if is_random:
     weight = cat['WEIGHT_FKP']
   else:
-    weight = cat['WEIGHT_FKP'] * cat['WEIGHT_SYSTOT']
+    weight = cat['WEIGHT_FKP']
 
   # write result to output file
   cout = np.c_[x, y, z, weight]
