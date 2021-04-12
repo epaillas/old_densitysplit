@@ -266,13 +266,15 @@ program tophat_filter
         end do
       end do
     end do
+    RR(i) = RR(i) / (nr * 1./ng)
+    delta(i) = DD(i) / RR(i) - 1
   end do
   !$OMP END PARALLEL DO
 
-  write(*,* )SUM(weights_tracers), SUM(weights_randoms)
+  !write(*,* )SUM(weights_tracers), SUM(weights_randoms)
   ! Normalize data and random counts
-  DD = DD / SUM(weights_tracers)
-  RR = RR / SUM(weights_randoms)
+  !DD = DD / SUM(weights_tracers)
+  !RR = RR / SUM(weights_randoms)
 
   ! Calculate density contrast
   if (estimator .eq. 'DP') then
