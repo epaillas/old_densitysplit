@@ -204,6 +204,9 @@ program tophat_filter
   RR = 0
   delta = 0
   ndif = int(dmax / rgrid + 1.)
+  dmin2 = dmin ** 2
+  dmax2 = dmax ** 2
+  
 
   call OMP_SET_NUM_THREADS(nthreads)
   if (debug) then
@@ -223,6 +226,7 @@ program tophat_filter
     do ix = ipx - ndif, ipx + ndif, 1
       do iy = ipy - ndif, ipy + ndif, 1
         do iz = ipz - ndif, ipz + ndif, 1
+          if ((ix-ipx)**2 + (iy-ipy)**2 + (iz-ipz)**2 .gt. (ndif + 1)**2) cycle
 
           ! loop over tracers in each cell
           ii = lirst_tracers(ix, iy, iz)
@@ -266,23 +270,21 @@ program tophat_filter
         end do
       end do
     end do
-    RR(i) = RR(i) / (nr * 1./ng)
-    delta(i) = DD(i) / RR(i) - 1
   end do
   !$OMP END PARALLEL DO
 
   !write(*,* )SUM(weights_tracers), SUM(weights_randoms)
   ! Normalize data and random counts
-  !DD = DD / SUM(weights_tracers)
-  !RR = RR / SUM(weights_randoms)
+  DD = DD / SUM(weights_tracers)
+  RR = RR / SUM(weights_randoms)
 
   ! Calculate density contrast
-  !if (estimator .eq. 'DP') then
-    !delta = DD / RR - 1
-  !else
-    !write(*,*) 'Estimator for the correlation function was not recognized.'
-    !stop
-  !end if
+  if (estimator .eq. 'DP') then
+    delta = DD / RR - 1
+  else
+    write(*,*) 'Estimator for the correlation function was not recognized.'
+    stop
+  end if
   
   ! write output  
   open(12, file=output_filter, status='replace', form='unformatted')

@@ -1,5 +1,6 @@
 # Compiler choice
 FC = gfortran
+IFC = ifort
 MPIFC = gfortran
 
 MLIBS = -lm
@@ -14,7 +15,7 @@ gaussian_filter.exe: gaussian_filter.o
 	$(FC) gaussian_filter.o -o gaussian_filter.exe $(MLIBS)
 
 tophat_filter.exe: tophat_filter.f90
-	$(MPIFC) -fopenmp tophat_filter.f90 -o tophat_filter.exe $(MLIBS)
+	$(IFC) -qopenmp tophat_filter.f90 -o tophat_filter.exe $(MLIBS)
 
 
 gaussian_filter.o: gaussian_filter.f90
