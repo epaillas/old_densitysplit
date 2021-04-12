@@ -277,12 +277,12 @@ program tophat_filter
   !RR = RR / SUM(weights_randoms)
 
   ! Calculate density contrast
-  if (estimator .eq. 'DP') then
-    delta = DD / RR - 1
-  else
-    write(*,*) 'Estimator for the correlation function was not recognized.'
-    stop
-  end if
+  !if (estimator .eq. 'DP') then
+    !delta = DD / RR - 1
+  !else
+    !write(*,*) 'Estimator for the correlation function was not recognized.'
+    !stop
+  !end if
   
   ! write output  
   open(12, file=output_filter, status='replace', form='unformatted')
