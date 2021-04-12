@@ -23,7 +23,7 @@ def fits_to_unformatted(
   else:
     weight = cat['WEIGHT_FKP'] * cat['WEIGHT_SYSTOT']
 
-  write result to output file
+  #write result to output file
   cout = np.c_[x, y, z, weight]
   nrows, ncols = np.shape(cout)
   f = FortranFile(output_filename, 'w')
