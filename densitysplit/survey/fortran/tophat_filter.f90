@@ -49,7 +49,7 @@ program tophat_filter
   implicit none
   
   real*8 :: rgrid, rfilter, gridmax, gridmin
-  real*8 :: disx, disy, disz, dis2
+  real*8 :: disx, disy, disz, dis2, norm
   real*8 :: dmin, dmax, dmin2, dmax2
   
   integer*8 :: ng, nc, nr
@@ -64,8 +64,8 @@ program tophat_filter
   integer*8, dimension(:), allocatable :: ll_tracers, ll_randoms
   
   real*8, allocatable, dimension(:,:)  :: tracers, randoms, centres
-  real*8, dimension(:), allocatable :: DD, RR, delta
-  real*8, dimension(:), allocatable :: weights_tracers, weights_randoms
+  real*8, dimension(:), allocatable :: DD, DR, delta
+  real*8, dimension(:), allocatable :: weights_tracers, weights_centres, weights_randoms
 
   logical :: debug = .true.
   
@@ -160,9 +160,16 @@ program tophat_filter
   read(11) nrows
   read(11) ncols
   allocate(centres(ncols, nrows))
+  allocate(weights_centres(nrows))
   read(11) centres
   close(11)
   nc = nrows
+  if (ncols .eq. 4) then
+    weights_centres = centres(4, :)
+    if (debug) write(*,*) 'Centres file has weight information.'
+  else
+    weights_centres = 1.0
+  end if
   if (debug) then
     write(*,*) 'ncentres dim: ', size(centres, dim=1), size(centres, dim=2)
     write(*,*) 'centres(min), tracers(max) = ', minval(centres(:,:)), maxval(centres(:,:))
@@ -198,10 +205,10 @@ program tophat_filter
 
   ! calculate number counts around each centre
   allocate(DD(nc))
-  allocate(RR(nc))
+  allocate(DR(nc))
   allocate(delta(nc))
   DD = 0
-  RR = 0
+  DR = 0
   delta = 0
   ndif = int(dmax / rgrid + 1.)
   dmin2 = dmin ** 2
@@ -219,8 +226,6 @@ program tophat_filter
     ipx = int((centres(1, i) - gridmin) / rgrid + 1.)
     ipy = int((centres(2, i) - gridmin) / rgrid + 1.)
     ipz = int((centres(3, i) - gridmin) / rgrid + 1.)
-
-    !threadid = OMP_get_thread_num()
 
     ! loop over cells around each centre
     do ix = ipx - ndif, ipx + ndif, 1
@@ -240,7 +245,7 @@ program tophat_filter
               dis2 = disx * disx + disy * disy + disz * disz
 
               if (dis2 .gt. dmin2 .and. dis2 .lt. dmax2) then
-                DD(i) = DD(i) + weights_tracers(ii)
+                DD(i) = DD(i) + weights_centres(i) * weights_tracers(ii)
               end if
   
               if(ii.eq.lirst_tracers(ix, iy, iz)) exit
@@ -260,7 +265,7 @@ program tophat_filter
               dis2 = disx * disx + disy * disy + disz * disz
 
               if (dis2 .gt. dmin2 .and. dis2 .lt. dmax2) then
-                RR(i) = RR(i) + weights_randoms(ii)
+                DR(i) = DR(i) + weights_centres(i) * weights_randoms(ii)
               end if
   
               if(ii .eq. lirst_randoms(ix, iy, iz)) exit
@@ -273,14 +278,11 @@ program tophat_filter
   end do
   !$OMP END PARALLEL DO
 
-  !write(*,* )SUM(weights_tracers), SUM(weights_randoms)
-  ! Normalize data and random counts
-  DD = DD / SUM(weights_tracers)
-  RR = RR / SUM(weights_randoms)
+  norm = SUM(weights_randoms) / SUM(weights_tracers)
 
   ! Calculate density contrast
   if (estimator .eq. 'DP') then
-    delta = DD / RR - 1
+    delta = norm * (DD / DR) - 1
   else
     write(*,*) 'Estimator for the correlation function was not recognized.'
     stop
