@@ -14,7 +14,7 @@ def fits_to_unformatted(
 
   if zrange is not None:
     zmin, zmax = zrange
-    ind = cat['Z'] > zmin & cat['Z'] < zmax
+    ind = (cat['Z'] > zmin) & (cat['Z'] < zmax)
     cat = cat[ind] 
 
   # convert redshifts to distances
