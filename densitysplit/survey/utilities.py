@@ -6,11 +6,16 @@ import argparse
 
 def fits_to_unformatted(
   input_filename, output_filename, cosmology,
-  is_random=False, equal_weights=False
+  is_random=False, equal_weights=False, zrange=None
 ):
   # open fits file
   with fits.open(input_filename) as hdul:
     cat = hdul[1].data
+
+  if zrange is not None:
+    zmin, zmax = zrange
+    ind = cat['Z'] > zmin & cat['Z'] < zmax
+    cat = cat[ind] 
 
   # convert redshifts to distances
   dist = cosmology.ComovingDistance(cat['Z'])
