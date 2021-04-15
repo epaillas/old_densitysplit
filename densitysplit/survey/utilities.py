@@ -15,13 +15,13 @@ def fits_to_unformatted(
   if zrange is not None:
     zmin, zmax = zrange
     ind = (cat['Z'] > zmin) & (cat['Z'] < zmax)
-    cat = cat[ind] 
+    cat = cat[ind]
 
   # convert redshifts to distances
   dist = cosmology.ComovingDistance(cat['Z'])
-  x = dist * np.sin(cat['DEC'] * np.pi / 180) * np.cos(cat['RA'] * np.pi / 180)
-  y = dist * np.sin(cat['DEC'] * np.pi / 180) * np.sin(cat['RA'] * np.pi / 180)
-  z = dist * np.cos(cat['DEC'] * np.pi / 180)
+  x = dist * np.cos(cat['DEC'] * np.pi / 180) * np.cos(cat['RA'] * np.pi / 180)
+  y = dist * np.cos(cat['DEC'] * np.pi / 180) * np.sin(cat['RA'] * np.pi / 180)
+  z = dist * np.sin(cat['DEC'] * np.pi / 180)
 
   if not equal_weights:
     if is_random:
