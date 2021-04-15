@@ -41,6 +41,35 @@ def fits_to_unformatted(
   f.write_record(cout)
   f.close()
 
+def fits_to_cute(
+  input_filename, output_filename, is_random=False,
+  equal_weights=False, zrange=None
+):
+  # open fits file
+  with fits.open(input_filename) as hdul:
+    cat = hdul[1].data
+
+  if zrange is not None:
+    zmin, zmax = zrange
+    ind = (cat['Z'] > zmin) & (cat['Z'] < zmax)
+    cat = cat[ind] 
+
+  ra = cat['RA']
+  dec = cat['DEC']
+  redshift = cat['Z']
+
+  if not equal_weights:
+    if is_random:
+      weight = cat['WEIGHT_FKP']
+    else:
+      weight = cat['WEIGHT_FKP'] * cat['WEIGHT_SYSTOT']
+  else:
+    weight = np.ones(len(cat))
+
+  #write result to output file
+  cout = np.c_[ra, dec, redshift, weight]
+  np.savetxt(output_filename, cout)
+
 
 def revolver_to_unformatted(
   input_filename, output_filename, cosmology,
