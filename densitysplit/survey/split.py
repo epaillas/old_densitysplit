@@ -60,27 +60,44 @@ def generate_centres(
   
 
 def filtered_density(
-  tracers_filename, centres_filename, randoms_filename,
-  output_filename, filter_type, filter_size,
-  ngrid, gridmin, gridmax,
-  dmin, dmax, output_format='unformatted',
-  nthreads=1
+  data_filename1, data_filename2, random_filename2,
+  output_filename, dim1_min, dim1_max,
+  filter_type, filter_size, ngrid, 
+  gridmin, gridmax, random_filename1=None,
+  nthreads=1, estimator='DP', output_format='unformatted'
 ):
 
-  if dmax == None:
+  # check if files exist
+  if not path.isfile(data_filename1):
+    raise FileNotFoundError(f'{data_filename1} does not exist.')
+
+  if not path.isfile(data_filename2):
+    raise FileNotFoundError(f'{data_filename2} does not exist.')
+
+  if not path.isfile(random_filename2):
+    raise FileNotFoundError(f'{random_filename2} does not exist.')
+
+  if estimator == 'LS' and random_filename1 == None:
+    raise RuntimeError('Lady-Szalay estimator requires a random catalogue for dataset 1.')
+
+  if random_filename1 == None:
+    random_filename1 = random_filename2
+
+  if dim1_max == None:
     if filter_type == 'tophat':
-            dmax = filter_size
+            dim1_max = filter_size
     elif filter_type == 'gaussian':
-            dmax = 5 * filter_size
+            dim1_max = 5 * filter_size
 
   binpath = path.join(path.dirname(__file__),
     'bin', '{}_filter.exe'.format(filter_type))
 
   cmd = [
-    binpath, tracers_filename, centres_filename,
-    randoms_filename, output_filename, str(dmin),
-    str(dmax), str(filter_size), str(ngrid),
-    str(gridmin), str(gridmax), str(nthreads)
+    binpath, data_filename1, data_filename2,
+    random_filename1, random_filename2, output_filename,
+    str(dim1_min), str(dim1_max), str(filter_size),
+    str(ngrid), str(gridmin), str(gridmax),
+    estimator, str(nthreads)
   ]
 
   subprocess.call(cmd)
