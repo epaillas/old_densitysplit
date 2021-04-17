@@ -13,8 +13,13 @@ def generate_centres(
 ):
   np.random.seed(0)
 
+
   if sampling == 'subsampling':
-    # first check if this is a numpy file
+
+    # check if file exists
+    if not path.isfile(sampling_filename):
+      raise FileNotFoundError(f'{sampling filename} does not exist.')
+    # check if this is a numpy file
     if '.npy' in sampling_filename:
       centres = np.load(sampling_filename)
     else:
