@@ -103,3 +103,40 @@ def revolver_to_unformatted(
   f.write_record(ncols)
   f.write_record(cout)
   f.close()
+
+
+def patchy_to_unformatted(
+  input_filename, output_filename, cosmology,
+  is_random=False, equal_weights=False, zrange=None
+):
+  # open text file
+  cat = np.genfromtxt(input_filename)
+
+  if zrange is not None:
+    zmin, zmax = zrange
+    ind = (cat[:,2] > zmin) & (cat[:,2] < zmax)
+    cat = cat[ind]
+
+  # convert redshifts to distances
+  dist = cosmology.ComovingDistance(cat['Z'])
+  x = dist * np.cos(cat[:,1] * np.pi / 180) * np.cos(cat[:,0] * np.pi / 180)
+  y = dist * np.cos(cat[:,1] * np.pi / 180) * np.sin(cat[:,0] * np.pi / 180)
+  z = dist * np.sin(cat[:,1] * np.pi / 180)
+
+  if not equal_weights:
+    if is_random:
+      weight = (cat[:,5] * cat[:,6]) / (1 + 10000 * cat[:,3])
+    else:
+      weight = (cat[:,6] * cat[:,7]) / (1 + 10000 * cat[:,4])
+  else:
+    weight = np.ones(len(cat))
+
+  #write result to output file
+  cout = np.c_[x, y, z, weight]
+  nrows, ncols = np.shape(cout)
+  f = FortranFile(output_filename, 'w')
+  nrows, ncols = np.shape(cout)
+  f.write_record(nrows)
+  f.write_record(ncols)
+  f.write_record(cout)
+  f.close()

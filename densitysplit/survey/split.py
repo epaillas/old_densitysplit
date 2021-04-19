@@ -144,7 +144,7 @@ def split_centres(
         ncols = fin.read_ints()[0]
         centres = fin.read_reals(dtype=np.float64).reshape(nrows, ncols)
       except:
-        sys.exit('Format of sampling file not recognized.')
+        sys.exit('Format of centres file not recognized.')
 
   # read smoothed densities
   # first check if this is a numpy file
@@ -164,7 +164,7 @@ def split_centres(
         smoothed_delta = f.read_reals(dtype=np.float64)
         f.close()
       except:
-        sys.exit('Format of sampling file not recognized.')
+        sys.exit('Format of filter file not recognized.')
   idx = np.argsort(smoothed_delta)
 
   # sort centres using smoothed densities
