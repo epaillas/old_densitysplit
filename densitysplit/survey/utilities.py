@@ -118,7 +118,7 @@ def patchy_to_unformatted(
     cat = cat[ind]
 
   # convert redshifts to distances
-  dist = cosmology.ComovingDistance(cat['Z'])
+  dist = cosmology.ComovingDistance(cat[:,2])
   x = dist * np.cos(cat[:,1] * np.pi / 180) * np.cos(cat[:,0] * np.pi / 180)
   y = dist * np.cos(cat[:,1] * np.pi / 180) * np.sin(cat[:,0] * np.pi / 180)
   z = dist * np.sin(cat[:,1] * np.pi / 180)
