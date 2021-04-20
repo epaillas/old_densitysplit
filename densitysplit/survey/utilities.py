@@ -143,7 +143,7 @@ def patchy_to_unformatted(
 
 
 def patchy_to_revolver(
-  input_filename, output_filename, cosmology,
+  input_filename, output_filename,
   is_random=False, zrange=None
 ):
   # open text file
