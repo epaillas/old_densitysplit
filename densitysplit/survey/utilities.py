@@ -140,3 +140,35 @@ def patchy_to_unformatted(
   f.write_record(ncols)
   f.write_record(cout)
   f.close()
+
+
+def patchy_to_revolver(
+  input_filename, output_filename, cosmology,
+  is_random=False, zrange=None
+):
+  # open text file
+  cat = np.genfromtxt(input_filename)
+
+  if zrange is not None:
+    zmin, zmax = zrange
+    ind = (cat[:,2] > zmin) & (cat[:,2] < zmax)
+    cat = cat[ind]
+
+  # convert redshifts to distances
+  dist = cosmology.ComovingDistance(cat[:,2])
+  x = dist * np.cos(cat[:,1] * np.pi / 180) * np.cos(cat[:,0] * np.pi / 180)
+  y = dist * np.cos(cat[:,1] * np.pi / 180) * np.sin(cat[:,0] * np.pi / 180)
+  z = dist * np.sin(cat[:,1] * np.pi / 180)
+
+  if is_random:
+    fkp = 1 / (1 + 10000 * cat[:,3])
+    veto = veto[:,5]
+    cp = cp[:,6]
+  else:
+    fkp = 1 / (1 + 10000 * cat[:,4])
+    veto = veto[:,6]
+    cp = cp[:,7]
+
+  #write result to output file
+  cout = np.c_[x, y, z, fkp, cp, veto]
+  np.savetxt(output_filename, cout)
