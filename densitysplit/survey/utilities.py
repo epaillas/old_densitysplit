@@ -154,11 +154,9 @@ def patchy_to_revolver(
     ind = (cat[:,2] > zmin) & (cat[:,2] < zmax)
     cat = cat[ind]
 
-  # convert redshifts to distances
-  dist = cosmology.ComovingDistance(cat[:,2])
-  x = dist * np.cos(cat[:,1] * np.pi / 180) * np.cos(cat[:,0] * np.pi / 180)
-  y = dist * np.cos(cat[:,1] * np.pi / 180) * np.sin(cat[:,0] * np.pi / 180)
-  z = dist * np.sin(cat[:,1] * np.pi / 180)
+  ra = cat[:,0]
+  dec = cat[:,1]
+  z = cat[:,2]
 
   if is_random:
     fkp = 1 / (1 + 10000 * cat[:,3])
@@ -170,5 +168,5 @@ def patchy_to_revolver(
     cp = cp[:,7]
 
   #write result to output file
-  cout = np.c_[x, y, z, fkp, cp, veto]
+  cout = np.c_[ra, dec, z, fkp, cp, veto]
   np.savetxt(output_filename, cout)
