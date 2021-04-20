@@ -160,12 +160,12 @@ def patchy_to_revolver(
 
   if is_random:
     fkp = 1 / (1 + 10000 * cat[:,3])
-    veto = veto[:,5]
-    cp = cp[:,6]
+    veto = cat[:,5]
+    cp = cat[:,6]
   else:
     fkp = 1 / (1 + 10000 * cat[:,4])
-    veto = veto[:,6]
-    cp = cp[:,7]
+    veto = cat[:,6]
+    cp = cat[:,7]
 
   #write result to output file
   cout = np.c_[ra, dec, z, fkp, cp, veto]
