@@ -24,10 +24,9 @@ def fits_to_unformatted(
   z = dist * np.sin(cat['DEC'] * np.pi / 180)
 
   if not equal_weights:
-    if is_random:
-      weight = cat['WEIGHT_FKP']
-    else:
-      weight = cat['WEIGHT_FKP'] * cat['WEIGHT_SYSTOT']
+    weight = cat['WEIGHT_FKP']
+    if not is_random:
+      weight *= cat['WEIGHT_SYSTOT'] * (cat['WEIGHT_CP'] * cat['WEIGHT_NOZ'] - 1)
   else:
     weight = np.ones(len(cat))
 
