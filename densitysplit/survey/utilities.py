@@ -3,6 +3,9 @@ import numpy as np
 from scipy.io import FortranFile
 from astropy.io import fits
 import argparse
+from scipy.interpolate import InterpolatedUnivariateSpline
+from scipy.special import eval_legendre
+from scipy.integrate import simps
 
 def fits_to_unformatted(
   input_filename, output_filename, cosmology,
@@ -169,3 +172,42 @@ def patchy_to_revolver(
   #write result to output file
   cout = np.c_[ra, dec, z, fkp, cp, veto]
   np.savetxt(output_filename, cout)
+
+def read_array_2d(input_filename):
+  data = np.genfromtxt(input_filename)
+  dim1 = np.unique(data[:,0])
+  dim2 = np.unique(data[:,1])
+
+  vary_dim2 = False
+  if data[0,0] == data[1,0]:
+      vary_dim2 = True
+
+  result = np.zeros([len(dim1), len(dim2)])
+  counter = 0
+  if vary_dim2:
+      for i in range(len(dim1)):
+          for j in range(len(dim2)):
+              result[i, j] = data[counter, 2]
+              counter += 1
+  else:
+      for i in range(len(dim2)):
+          for j in range(len(dim1)):
+              result[j, i] = data[counter, 2]
+              counter += 1
+  return dim1, dim2, result
+
+def get_multipole(ell, s, mu, xi_smu):
+  multipole = np.zeros(xi_smu.shape[0])
+  if mu.min() < 0:
+      factor = 2
+      mumin = -1
+  else:
+      factor = 1
+      mumin=0
+  for i in range(xi_smu.shape[0]):
+      mufunc = InterpolatedUnivariateSpline(mu, xi_smu[i, :], k=3, ext=3)
+      xaxis = np.linspace(mumin, 1, 1000)
+      lmu = eval_legendre(ell, xaxis)
+      yaxis = mufunc(xaxis) * (2 * ell + 1) / factor * lmu
+      multipole[i] = simps(yaxis, xaxis)
+  return s, multipole
