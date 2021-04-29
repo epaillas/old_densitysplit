@@ -12,8 +12,8 @@ program tophat_filter
   
   integer*8 :: ndata2, ndata1
   integer*8 :: i, ii, ix, iy, iz, ix2, iy2, iz2
-  integer*8 :: ipx, ipy, ipz, ndif
-  integer*8 :: ngrid
+  integer*8 :: ipx, ipy, ipz, ndif, ngrid
+  integer*4 :: nthreads
   
   integer*8, dimension(:, :, :), allocatable :: lirst
   integer*8, dimension(:), allocatable :: ll
@@ -26,10 +26,10 @@ program tophat_filter
   character(20), external :: str
   character(len=500) :: data_filename2, data_filename1, output_filename
   character(len=10) :: dim1_max_char, dim1_min_char
-  character(len=10) :: boxchar, rfilter_char
-  character(len=10) :: ngridchar
+  character(len=10) :: boxchar, rfilter_char, nthreads_char
+  character(len=10) :: ngrid_char
   
-  if (iargc() .lt. 8) then
+  if (iargc() .lt. 9) then
       write(*,*) 'Some arguments are missing.'
       write(*,*) '1) data_filename1'
       write(*,*) '2) data_filename2'
@@ -39,6 +39,7 @@ program tophat_filter
       write(*,*) '6) dim1_max'
       write(*,*) '7) rfilter'
       write(*,*) '8) ngrid'
+      write(*,*) '9) nthreads'
       write(*,*) ''
       stop
     end if
@@ -50,13 +51,15 @@ program tophat_filter
   call get_command_argument(number=5, value=dim1_min_char)
   call get_command_argument(number=6, value=dim1_max_char)
   call get_command_argument(number=7, value=rfilter_char)
-  call get_command_argument(number=8, value=ngridchar)
+  call get_command_argument(number=8, value=ngrid_char)
+  call get_command_argument(number=9, value=nthreads_char)
   
   read(boxchar, *) boxsize
   read(dim1_min_char, *) dim1_min
   read(dim1_max_char, *) dim1_max
   read(rfilter_char, *) rfilter
-  read(ngridchar, *) ngrid
+  read(ngrid_char, *) ngrid
+  read(nthreads_char, *) nthreads
 
   write(*,*) '-----------------------'
   write(*,*) 'Running tophat_filter.exe'
@@ -69,7 +72,8 @@ program tophat_filter
   write(*, *) 'dim1_min: ', trim(dim1_min_char), ' Mpc'
   write(*, *) 'dim1_max: ', trim(dim1_max_char), ' Mpc'
   write(*, *) 'rfilter: ', trim(rfilter_char), 'Mpc'
-  write(*, *) 'ngrid: ', trim(ngridchar)
+  write(*, *) 'ngrid: ', trim(ngrid_char)
+  write(*, *) 'nthreads: ', trim(nthreads_char)
   write(*,*) ''
 
   call read_unformatted(data_filename1, data1, weight1, ndata1, has_velocity1)
@@ -86,6 +90,9 @@ program tophat_filter
   dim1_min2 = dim1_min * dim1_min
   dim1_max2 = dim1_max * dim1_max
   box2 = boxsize / 2
+
+  call OMP_SET_NUM_THREADS(nthreads)
+  write(*,*) 'Maximum number of threads: ', OMP_GET_MAX_THREADS()
   
   !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(i, ii, ipx, ipy, &
   !$OMP ipz, ix, iy, iz, ix2, iy2, iz2, disx, disy, disz, dis2)

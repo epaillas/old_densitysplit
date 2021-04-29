@@ -63,7 +63,7 @@ def generate_centres(
 
 def filtered_density(
   data_filename1, data_filename2, output_filename,
-  filter_type, filter_size, ngrid,
+  filter_type, filter_size, ngrid, box_size,
   nthreads=1, dim1_min=0, dim1_max=None,
   output_format='unformatted'
 ):
@@ -87,8 +87,9 @@ def filtered_density(
 
   cmd = [
     binpath, data_filename1, data_filename2,
-    output_filename, str(dim1_min), str(dim1_max),
-    str(filter_size), str(ngrid), str(nthreads)
+    output_filename, str(box_size), str(dim1_min),
+    str(dim1_max), str(filter_size), str(ngrid),
+    str(nthreads)
   ]
 
   subprocess.call(cmd)
