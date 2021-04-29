@@ -3,7 +3,7 @@ program tophat_filter
   use procedures
   implicit none
   
-  real*8 :: rgrid_x, rgrid_y, rgrid_z, vol, mean_density
+  real*8 :: bin_volume, mean_density
   real*8 :: boxsize, box2
   real*8 :: disx, disy, disz, dis, dis2
   real*8 :: dim1_min2, dim1_max2
@@ -97,9 +97,9 @@ program tophat_filter
   !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(i, ii, ipx, ipy, &
   !$OMP ipz, ix, iy, iz, ix2, iy2, iz2, disx, disy, disz, dis2)
   do i = 1, ndata1
-    ipx = int(data1(1, i) / rgrid_x + 1.)
-    ipy = int(data1(2, i) / rgrid_y + 1.)
-    ipz = int(data1(3, i) / rgrid_z + 1.)
+    ipx = int(data1(1, i) / rgrid + 1.)
+    ipy = int(data1(2, i) / rgrid + 1.)
+    ipz = int(data1(3, i) / rgrid + 1.)
   
     do ix = ipx - ndif, ipx + ndif
       do iy = ipy - ndif, ipy + ndif
@@ -144,12 +144,11 @@ program tophat_filter
         end do
       end do
     end do
-
-  vol = 4./3 * pi * (dim1_max ** 3 - dim1_min ** 3)
-  delta(i) = D1D2(i) / (vol * mean_density) - 1
-
   end do
   !$OMP END PARALLEL DO
+
+  bin_volume = 4./3 * pi * (dim1_max ** 3 - dim1_min ** 3)
+  delta = D1D2 / (bin_volume * mean_density) - 1
   
   write(*,*) ''
   write(*,*) 'Calculation finished. Writing output...'
