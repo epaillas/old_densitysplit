@@ -84,7 +84,7 @@ program tophat_filter
   write(*,*) 'data1(min, max) = ', minval(data1(:,:)), maxval(data1(:,:))
   write(*,*) 'weight1(min, max) = ', minval(weight1), maxval(weight1)
   write(*,*) 'ndata2 dim: ', size(data2, dim=1), size(data2, dim=2)
-  write(*,*) 'data2(min, max) = ', minval(data2(:,:)), maxval(data2(:,:))
+  write(*,*) 'data2(min, max) = ', minval(data2(1,:)), maxval(data2(1,:))
   write(*,*) 'weight2(min, max) = ', minval(weight2), maxval(weight2)
 
   allocate(D1D2(ndata1))
