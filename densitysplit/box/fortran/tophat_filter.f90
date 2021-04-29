@@ -31,8 +31,8 @@ program tophat_filter
   
   if (iargc() .lt. 8) then
       write(*,*) 'Some arguments are missing.'
-      write(*,*) '1) input_data'
-      write(*,*) '2) data_filename1'
+      write(*,*) '1) data_filename1'
+      write(*,*) '2) data_filename2'
       write(*,*) '3) output_filename'
       write(*,*) '4) boxsize'
       write(*,*) '5) dim1_min'
@@ -43,8 +43,8 @@ program tophat_filter
       stop
     end if
     
-  call get_command_argument(number=1, value=data_filename2)
-  call get_command_argument(number=2, value=data_filename1)
+  call get_command_argument(number=1, value=data_filename1)
+  call get_command_argument(number=2, value=data_filename2)
   call get_command_argument(number=3, value=output_filename)
   call get_command_argument(number=4, value=boxchar)
   call get_command_argument(number=5, value=dim1_min_char)
@@ -62,8 +62,8 @@ program tophat_filter
   write(*,*) 'Running tophat_filter.exe'
   write(*,*) 'input parameters:'
   write(*,*) ''
-  write(*, *) 'data_filename2: ', trim(data_filename2)
   write(*, *) 'data_filename1: ', trim(data_filename1)
+  write(*, *) 'data_filename2: ', trim(data_filename2)
   write(*, *) 'boxsize: ', trim(boxchar)
   write(*, *) 'output_filename: ', trim(output_filename)
   write(*, *) 'dim1_min: ', trim(dim1_min_char), ' Mpc'
