@@ -26,7 +26,7 @@ program tophat_filter
   character(20), external :: str
   character(len=500) :: data_filename2, data_filename1, output_filename
   character(len=10) :: dim1_max_char, dim1_min_char
-  character(len=10) :: boxchar, rfilter_char, nthreads_char
+  character(len=10) :: boxsize_char, rfilter_char, nthreads_char
   character(len=10) :: ngrid_char
   
   if (iargc() .lt. 9) then
@@ -47,14 +47,14 @@ program tophat_filter
   call get_command_argument(number=1, value=data_filename1)
   call get_command_argument(number=2, value=data_filename2)
   call get_command_argument(number=3, value=output_filename)
-  call get_command_argument(number=4, value=boxchar)
+  call get_command_argument(number=4, value=boxsize_char)
   call get_command_argument(number=5, value=dim1_min_char)
   call get_command_argument(number=6, value=dim1_max_char)
   call get_command_argument(number=7, value=rfilter_char)
   call get_command_argument(number=8, value=ngrid_char)
   call get_command_argument(number=9, value=nthreads_char)
   
-  read(boxchar, *) boxsize
+  read(boxsize_char, *) boxsize
   read(dim1_min_char, *) dim1_min
   read(dim1_max_char, *) dim1_max
   read(rfilter_char, *) rfilter
@@ -67,7 +67,7 @@ program tophat_filter
   write(*,*) ''
   write(*, *) 'data_filename1: ', trim(data_filename1)
   write(*, *) 'data_filename2: ', trim(data_filename2)
-  write(*, *) 'boxsize: ', trim(boxchar)
+  write(*, *) 'boxsize: ', trim(boxsize_char)
   write(*, *) 'output_filename: ', trim(output_filename)
   write(*, *) 'dim1_min: ', trim(dim1_min_char), ' Mpc'
   write(*, *) 'dim1_max: ', trim(dim1_max_char), ' Mpc'
@@ -79,6 +79,13 @@ program tophat_filter
   call read_unformatted(data_filename1, data1, weight1, ndata1, has_velocity1)
   call read_unformatted(data_filename2, data2, weight2, ndata2, has_velocity2)
   call linked_list(data2, boxsize, ngrid, ll, lirst, rgrid)
+
+  write(*,*) 'ndata1 dim: ', size(data1, dim=1), size(data1, dim=2)
+  write(*,*) 'data1(min, max) = ', minval(data1(:,:)), maxval(data1(:,:))
+  write(*,*) 'weight1(min, max) = ', minval(weight1), maxval(weight1)
+  write(*,*) 'ndata2 dim: ', size(data2, dim=1), size(data2, dim=2)
+  write(*,*) 'data2(min, max) = ', minval(data2(:,:)), maxval(data2(:,:))
+  write(*,*) 'weight2(min, max) = ', minval(weight2), maxval(weight2)
 
   allocate(D1D2(ndata1))
   allocate(delta(ndata1))
