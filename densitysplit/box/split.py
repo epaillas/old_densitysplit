@@ -63,8 +63,8 @@ def generate_centres(
 
 def filtered_density(
   data_filename1, data_filename2, output_filename,
-  dim1_min, dim1_max, filter_type,
-  filter_size, ngrid, nthreads=1,
+  filter_type, filter_size, ngrid,
+  nthreads=1, dim1_min=0, dim1_max=None
   output_format='unformatted'
 ):
 
