@@ -4,7 +4,6 @@ import numpy as np
 import subprocess
 from scipy.io import FortranFile
 
-
 def generate_centres(
   ncentres, output_filename, sampling='uniform',
   sampling_filename=None, xmin=0, xmax=0,
@@ -63,11 +62,10 @@ def generate_centres(
   
 
 def filtered_density(
-  data_filename1, data_filename2, random_filename2,
-  output_filename, dim1_min, dim1_max,
-  filter_type, filter_size, ngrid, 
-  gridmin, gridmax, random_filename1=None,
-  nthreads=1, estimator='DP', output_format='unformatted'
+  data_filename1, data_filename2, output_filename,
+  dim1_min, dim1_max, filter_type,
+  filter_size, ngrid, nthreads=1,
+  output_format='unformatted'
 ):
 
   # check if files exist
@@ -77,14 +75,6 @@ def filtered_density(
   if not path.isfile(data_filename2):
     raise FileNotFoundError(f'{data_filename2} does not exist.')
 
-  if not path.isfile(random_filename2):
-    raise FileNotFoundError(f'{random_filename2} does not exist.')
-
-  if estimator == 'LS' and random_filename1 == None:
-    raise RuntimeError('Lady-Szalay estimator requires a random catalogue for dataset 1.')
-
-  if random_filename1 == None:
-    random_filename1 = random_filename2
 
   if dim1_max == None:
     if filter_type == 'tophat':
@@ -97,10 +87,8 @@ def filtered_density(
 
   cmd = [
     binpath, data_filename1, data_filename2,
-    random_filename1, random_filename2, output_filename,
-    str(dim1_min), str(dim1_max), str(filter_size),
-    str(ngrid), str(gridmin), str(gridmax),
-    estimator, str(nthreads)
+    output_filename, str(dim1_min), str(dim1_max),
+    str(filter_size), str(ngrid), str(nthreads)
   ]
 
   subprocess.call(cmd)
