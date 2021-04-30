@@ -140,7 +140,7 @@ program tophat_filter
   
               dis2 = disx * disx + disy * disy + disz * disz
 
-              if (dis2 .gt. dim1_min2 .and. dis .lt. dim1_max2) then
+              if (dis2 .gt. dim1_min2 .and. dis2 .lt. dim1_max2) then
                 D1D2(i) = D1D2(i) + weight1(i) * weight2(ii)
               end if
 
