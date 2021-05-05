@@ -162,7 +162,8 @@ program tophat_filter
   end if
   if (debug) then
     write(*,*) 'ndata1 dim: ', size(data1, dim=1), size(data1, dim=2)
-    write(*,*) 'data1(min), data2(max) = ', minval(data1(:,:)), maxval(data1(:,:))
+    write(*,*) 'data1(min), data1(max) = ', minval(data1(:,:)), maxval(data1(:,:))
+    write(*,*) 'weight_data1(min), weight_data1(max) = ', minval(weight_data1), maxval(weight_data1)
   end if
 
   ! read data catalogue #2
@@ -183,6 +184,7 @@ program tophat_filter
   if (debug) then
     write(*,*) 'ndata2 dim: ', size(data2, dim=1), size(data2, dim=2)
     write(*,*) 'data2(min), data2(max) = ', minval(data2(:,:)), maxval(data2(:,:))
+    write(*,*) 'weight_data2(min), weight_data2(max) = ', minval(weight_data2), maxval(weight_data2)
   end if
 
   if (estimator .eq. 'LS') then
@@ -202,8 +204,9 @@ program tophat_filter
       weight_random1 = 1.0
     end if
     if (debug) then 
-      write(*,*) 'nrandom2 dim: ', size(random1, dim=1), size(random1, dim=2)
-      write(*,*) 'random2(min), random2(max) = ', minval(random1(:,:)), maxval(random1(:,:))
+      write(*,*) 'nrandom1 dim: ', size(random1, dim=1), size(random1, dim=2)
+      write(*,*) 'random1(min), random1(max) = ', minval(random1(:,:)), maxval(random1(:,:))
+      write(*,*) 'weight_data1(min), weight_data1(max) = ', minval(weight_data1), maxval(weight_data1)
     end if
   end if
 
@@ -225,6 +228,7 @@ program tophat_filter
   if (debug) then 
     write(*,*) 'nrandom2 dim: ', size(random2, dim=1), size(random2, dim=2)
     write(*,*) 'random2(min), random2(max) = ', minval(random2(:,:)), maxval(random2(:,:))
+    write(*,*) 'weight_random2(min), weight_random2(max) = ', minval(weight_random2), maxval(weight_random2)
   end if
   
   ! construct linked lists for data2 and random2
