@@ -29,7 +29,7 @@ def fits_to_unformatted(
   if not equal_weights:
     weight = cat['WEIGHT_FKP']
     if not is_random:
-      weight *= cat['WEIGHT_SYSTOT'] * (cat['WEIGHT_CP'] * cat['WEIGHT_NOZ'] - 1)
+      weight *= cat['WEIGHT_SYSTOT'] * (cat['WEIGHT_CP'] + cat['WEIGHT_NOZ'] - 1)
   else:
     weight = np.ones(len(cat))
 
