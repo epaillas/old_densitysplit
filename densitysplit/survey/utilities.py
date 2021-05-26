@@ -7,6 +7,36 @@ from scipy.interpolate import InterpolatedUnivariateSpline
 from scipy.special import eval_legendre
 from scipy.integrate import simps
 
+def fits_to_ascii(
+  input_filename, output_filename, cosmology,
+  is_random=False, equal_weights=False, zrange=None
+):
+  # open fits file
+  with fits.open(input_filename) as hdul:
+    cat = hdul[1].data
+
+  if zrange is not None:
+    zmin, zmax = zrange
+    ind = (cat['Z'] > zmin) & (cat['Z'] < zmax)
+    cat = cat[ind]
+
+  # convert redshifts to distances
+  dist = cosmology.ComovingDistance(cat['Z'])
+  x = dist * np.cos(cat['DEC'] * np.pi / 180) * np.cos(cat['RA'] * np.pi / 180)
+  y = dist * np.cos(cat['DEC'] * np.pi / 180) * np.sin(cat['RA'] * np.pi / 180)
+  z = dist * np.sin(cat['DEC'] * np.pi / 180)
+
+  if not equal_weights:
+    weight = cat['WEIGHT_FKP']
+    if not is_random:
+      weight *= cat['WEIGHT_SYSTOT'] * (cat['WEIGHT_CP'] + cat['WEIGHT_NOZ'] - 1)
+  else:
+    weight = np.ones(len(cat))
+
+  #write result to output file
+  cout = np.c_[x, y, z, weight]
+  np.savetxt(output_filename, cout)
+
 def fits_to_unformatted(
   input_filename, output_filename, cosmology,
   is_random=False, equal_weights=False, zrange=None
