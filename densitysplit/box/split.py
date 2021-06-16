@@ -62,18 +62,18 @@ def generate_centres(
   
 
 def filtered_density(
-  data_filename1, data_filename2, output_filename,
+  centres_filename, tracers_filename, output_filename,
   filter_type, filter_size, ngrid, box_size,
   nthreads=1, dim1_min=0, dim1_max=None,
   output_format='unformatted'
 ):
 
   # check if files exist
-  if not path.isfile(data_filename1):
-    raise FileNotFoundError(f'{data_filename1} does not exist.')
+  if not path.isfile(centres_filename):
+    raise FileNotFoundError(f'{centres_filename} does not exist.')
 
-  if not path.isfile(data_filename2):
-    raise FileNotFoundError(f'{data_filename2} does not exist.')
+  if not path.isfile(tracers_filename):
+    raise FileNotFoundError(f'{tracers_filename} does not exist.')
 
 
   if dim1_max == None:
@@ -86,7 +86,7 @@ def filtered_density(
     'bin', '{}_filter.exe'.format(filter_type))
 
   cmd = [
-    binpath, data_filename1, data_filename2,
+    binpath, centres_filename, tracers_filename,
     output_filename, str(box_size), str(dim1_min),
     str(dim1_max), str(filter_size), str(ngrid),
     str(nthreads)
