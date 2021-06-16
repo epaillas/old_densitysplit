@@ -10,6 +10,8 @@ import sys
 from shutil import rmtree
 
 from setuptools import find_packages, setup, Command
+from setuptools.command.install import install
+import subprocess
 
 # Package meta-data.
 NAME = 'densitysplit'
@@ -92,6 +94,17 @@ class UploadCommand(Command):
         sys.exit()
 
 
+class compileLibrary(install):
+  def run(self):
+    install.run(self)
+    command = "cd densitysplit/box"
+    command += " && make"
+    command += " && cd ../survey"
+    command += " && make"
+    process = subprocess.Popen(command, shell=True)
+    process.wait()
+
+
 # Where the magic happens:
 setup(
     name=NAME,
@@ -127,5 +140,6 @@ setup(
     # $ setup.py publish support.
     cmdclass={
         'upload': UploadCommand,
+	'install': compileLibrary,
     },
 )
