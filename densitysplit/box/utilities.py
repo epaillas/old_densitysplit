@@ -3,10 +3,10 @@ import numpy as np
 from scipy.io import FortranFile
 
 def ascii_to_unformatted(input_filename, output_filename,
-  pos_cols=[0, 1, 2], vel_cols=None, weight_cols=None
-):
+  pos_cols=[0, 1, 2], vel_cols=None, weight_cols=None):
   # import data
   data = np.genfromtxt(input_filename)
+  data = data.astype(np.float64)
   
   pos = data[:, pos_cols]
   cout = pos # default catalogue with only positions
@@ -23,6 +23,15 @@ def ascii_to_unformatted(input_filename, output_filename,
   f.write_record(nrows)
   f.write_record(ncols)
   f.write_record(cout)
+  f.close()
+
+def npy_to_unformatted(array, output_filename):
+  array = array.astype(np.float64)
+  f = FortranFile(output_filename, 'w')
+  nrows, ncols = np.shape(array)
+  f.write_record(nrows)
+  f.write_record(ncols)
+  f.write_record(array)
   f.close()
 
 def read_array_2d(input_filename):
