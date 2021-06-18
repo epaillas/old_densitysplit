@@ -20,7 +20,7 @@ URL = 'https://github.com/epaillas/densitysplit'
 EMAIL = 'epaillas@astro.puc.cl'
 AUTHOR = 'Enrique Paillas'
 REQUIRES_PYTHON = '>=3.6.0'
-VERSION = '0.1.3'
+VERSION = '0.2.0'
 
 # What packages are required for this module to be executed?
 REQUIRED = [
@@ -96,13 +96,13 @@ class UploadCommand(Command):
 
 class compileLibrary(install):
   def run(self):
-    install.run(self)
     command = "cd densitysplit/box"
     command += " && make"
     command += " && cd ../survey"
     command += " && make"
     process = subprocess.Popen(command, shell=True)
     process.wait()
+    install.run(self)
 
 
 # Where the magic happens:
