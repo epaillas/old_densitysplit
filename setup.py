@@ -10,7 +10,7 @@ import sys
 from shutil import rmtree
 
 from setuptools import find_packages, setup, Command
-from setuptools.command.install import install
+from distutils.command.install import install
 import subprocess
 
 # Package meta-data.
