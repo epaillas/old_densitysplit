@@ -7,6 +7,116 @@ from scipy.interpolate import InterpolatedUnivariateSpline
 from scipy.special import eval_legendre
 from scipy.integrate import simps
 
+
+def sky_to_cartesian(data, cosmology):
+  '''
+  Converts a catalogue in sky coordinates
+  to comoving cartesian coordinates. This
+  assumes the usual convention where
+  RA = [0, 360] and DEC = [-90, 90].
+
+  Parameters:  data: ndarray
+               Array containing the catalogue in sky coordinates.
+
+	       cosmology: Cosmology object
+	       Object describing the cosmology for coordinate conversion.
+  '''
+
+  ra = data[:,0]
+  dec = data[:,1]
+  redshift = data[:,2]
+
+  if np.any(dec > 90):
+    dec = 90 - dec
+
+  dist = cosmology.ComovingDistance(redshift)
+  x = dist * np.cos(dec * np.pi / 180) * np.cos(ra * np.pi / 180)
+  y = dist * np.cos(dec * np.pi / 180) * np.sin(ra * np.pi / 180)
+  z = dist * np.sin(dec * np.pi / 180)
+
+  cout = np.c_[x, y, z]
+  return cout
+
+def cartesian_to_sky(data, cosmology):
+  '''
+  Converts a catalogue in comoving cartesian
+  coordinates to sky coordinates. The returned
+  array is in the usual convetion RA = [0, 360]
+  and DEC = [-90, 90].
+
+  Parameters:  data: ndarray
+               Array containing the catalogue in cartesian coordinates.
+
+	       cosmology: Cosmology object
+	       Object describing the cosmology for coordinate conversion.
+  '''
+
+  x = data[:,0]
+  y = data[:,1]
+  z = data[:,2]
+
+  dis = np.sqrt(x ** 2 + y ** 2 + z ** 2)
+  dec = np.arctan2(np.sqrt(x ** 2 + y ** 2), z) * 180 / np.pi
+  ra = np.arctan2(y, x) * 180 / np.pi
+  redshift = cosmology.Redshift(dis)
+
+  ind = ra > 360
+  ra[ind] -= 360
+  ind = ra < 0
+  ra[ind] += 360
+  
+  dec = 90 - dec
+
+  cout = np.c_[ra, dec, redshift]
+  return cout
+
+
+def save_as_unformatted(data, filename):
+  '''
+  Saves a numpy array as an unformatted
+  Fortran 90 file that can be handled by
+  this package's numerical routines.
+
+  Parameters:  data: ndarray
+               Array to be saved.
+
+	       filename: str
+	       Name of the output file.
+  '''
+  data = np.asarray(data)
+
+  nrows, ncols = np.shape(data)
+  f = FortranFile(filename, 'w')
+  nrows, ncols = np.shape(data)
+  f.write_record(nrows)
+  f.write_record(ncols)
+  f.write_record(data)
+  f.close()
+
+def read_boss_fits(filename, columns=['RA', 'DEC', 'Z']):
+
+  '''
+  Reads a BOSS DR12 clustering catalogue in fits format
+  and returns it as a numpy array in the desired order.
+
+  Parameters:  filename: str
+               Name of the input file.
+	       
+	       columns: list
+	       List containing the strings corresponding to the
+	       columns that want to be extracted.
+  '''
+
+  with fits.open(filename) as hdul:
+    cat = hdul[1].data
+
+  cout = cat[columns[0]]
+
+  for column in columns[1:]:
+    cout = np.c_[cout, cat[column]]
+
+  return cout
+
 def fits_to_ascii(
   input_filename, output_filename, cosmology,
   is_random=False, equal_weights=False, zrange=None
