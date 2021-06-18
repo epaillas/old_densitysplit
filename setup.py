@@ -10,7 +10,8 @@ import sys
 from shutil import rmtree
 
 from setuptools import find_packages, setup, Command
-from distutils.command.install import install
+from setuptools.command.build_ext import build_ext
+import distutils.command.build
 import subprocess
 
 # Package meta-data.
@@ -20,7 +21,7 @@ URL = 'https://github.com/epaillas/densitysplit'
 EMAIL = 'epaillas@astro.puc.cl'
 AUTHOR = 'Enrique Paillas'
 REQUIRES_PYTHON = '>=3.6.0'
-VERSION = '0.2.1'
+VERSION = '0.2.2'
 
 # What packages are required for this module to be executed?
 REQUIRED = [
@@ -94,15 +95,16 @@ class UploadCommand(Command):
         sys.exit()
 
 
-class compileLibrary(install):
+class BuildCommand(distutils.command.build.build):
+  """Customized setuptools build command - builds protos on build."""
   def run(self):
+    distutils.command.build.build.run(self)
     command = "cd densitysplit/box"
     command += " && make"
     command += " && cd ../survey"
     command += " && make"
     process = subprocess.Popen(command, shell=True)
     process.wait()
-    install.run(self)
 
 
 # Where the magic happens:
@@ -126,6 +128,7 @@ setup(
     install_requires=REQUIRED,
     extras_require=EXTRAS,
     include_package_data=True,
+    has_ext_modules=lambda: True,
     license='MIT',
     classifiers=[
         # Trove classifiers
@@ -139,7 +142,7 @@ setup(
     ],
     # $ setup.py publish support.
     cmdclass={
+        'build': BuildCommand,
         'upload': UploadCommand,
-	'install': compileLibrary,
     },
 )
