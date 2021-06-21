@@ -28,7 +28,8 @@ program tophat_filter
   character(len=10) :: dim1_max_char, dim1_min_char
   character(len=10) :: boxsize_char, rfilter_char, nthreads_char
   character(len=10) :: ngrid_char
-  
+
+
   if (iargc() .lt. 9) then
       write(*,*) 'Some arguments are missing.'
       write(*,*) '1) data_filename1'
