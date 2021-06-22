@@ -6,61 +6,64 @@ from scipy.io import FortranFile
 
 
 def generate_centres(
-  ncentres, output_filename, sampling='uniform',
-  sampling_filename=None, xmin=0, xmax=0,
-  ymin=0, ymax=0, zmin=0,
-  zmax=0, output_format='unformatted'
+    ncentres, output_filename, sampling='uniform',
+    sampling_filename=None, xmin=0, xmax=0,
+    ymin=0, ymax=0, zmin=0,
+    zmax=0, output_format='unformatted'
 ):
-  np.random.seed(0)
 
-  if sampling == 'subsampling':
-    # check if file exists
-    if not path.isfile(sampling_filename):
-      raise FileNotFoundError(f'{sampling_filename} does not exist.')
-    # check if this is a numpy file
-    if '.npy' in sampling_filename:
-      centres = np.load(sampling_filename)
+    np.random.seed(0)
+
+    if sampling == 'subsampling':
+        # check if file exists
+        if not path.isfile(sampling_filename):
+            raise FileNotFoundError(f'{sampling_filename} does not exist.')
+        # check if this is a numpy file
+        if '.npy' in sampling_filename:
+            centres = np.load(sampling_filename)
+        else:
+            # if not, check if it is a text file
+            try:
+                centres = np.genfromtxt(sampling_filename)
+            except Exception:
+                # else, check if it is an unformatted file
+                try:
+                    fin = FortranFile(sampling_filename, 'r')
+                    nrows = fin.read_ints()[0]
+                    ncols = fin.read_ints()[0]
+                    pos = fin.read_reals(dtype=np.float64).reshape(
+                        nrows, ncols
+                    )
+                    idx = np.random.choice(nrows, size=ncentres, replace=False)
+                    centres = pos[idx]
+                except Exception:
+                    sys.exit('Format of sampling file not recognized.')
+
+    elif sampling == 'uniform':
+        x = np.random.uniform(xmin, xmax, ncentres)
+        y = np.random.uniform(ymin, ymax, ncentres)
+        z = np.random.uniform(zmin, zmax, ncentres)
+        centres = np.c_[x, y, z]
     else:
-      # if not, check if it is a text file
-      try:
-        centres = np.genfromtxt(sampling_filename)
-      except:
-        # else, check if it is an unformatted file
-        try:
-          fin = FortranFile(sampling_filename, 'r')
-          nrows = fin.read_ints()[0]
-          ncols = fin.read_ints()[0]
-          pos = fin.read_reals(dtype=np.float64).reshape(nrows, ncols)
-          idx = np.random.choice(nrows, size=ncentres, replace=False)
-          centres = pos[idx]
-        except:
-          sys.exit('Format of sampling file not recognized.')
+        sys.exit('Sampling type not recognized')
 
-  elif sampling == 'uniform':
-      x = np.random.uniform(xmin, xmax, ncentres)
-      y = np.random.uniform(ymin, ymax, ncentres)
-      z = np.random.uniform(zmin, zmax, ncentres)
-      centres = np.c_[x, y, z]
-  else:
-      sys.exit('Sampling type not recognized')
+    centres = centres.astype('float64')
+    if output_format == 'unformatted':
+        f = FortranFile(output_filename, 'w')
+        nrows, ncols = np.shape(centres)
+        f.write_record(nrows)
+        f.write_record(ncols)
+        f.write_record(centres)
+        f.close()
+    elif output_format == 'ascii':
+        np.savetxt(output_filename, centres)
+    elif output_format == 'numpy':
+        np.save(output_filename, centres)
+    else:
+        sys.exit('Output format not recognized.')
 
-  centres = centres.astype('float64')
-  if output_format == 'unformatted':
-    f = FortranFile(output_filename, 'w')
-    nrows, ncols = np.shape(centres)
-    f.write_record(nrows)
-    f.write_record(ncols)
-    f.write_record(centres)
-    f.close()
-  elif output_format == 'ascii':
-    np.savetxt(output_filename, centres)
-  elif output_format == 'numpy':
-    np.save(output_filename, centres)
-  else:
-    sys.exit('Output format not recognized.')
-
-  return centres
-  
+    return centres
+      
 
 def filtered_density(
   data_filename1, data_filename2, random_filename2,
