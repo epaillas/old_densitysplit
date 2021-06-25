@@ -78,8 +78,7 @@ def get_multipole(ell, s, mu, xi_smu):
                  to the line of sight.
 
                  xi_smu: 2D array_like
-
-
+                 Correlation function binned in s and mu.
     '''
     multipole = np.zeros(xi_smu.shape[0])
     if mu.min() < 0:
