@@ -36,6 +36,11 @@ def generate_centres(
           sys.exit('Format of sampling file not recognized.')
 
   elif sampling == 'uniform':
+      if np.all(np.array([xmin, xmax, ymin,
+        ymax, zmin, zmax]) == 0):
+          raise ValueError('At least one of the bounding coordinates '
+            'has to be different than zero under uniform sampling.')
+
       x = np.random.uniform(xmin, xmax, ncentres)
       y = np.random.uniform(ymin, ymax, ncentres)
       z = np.random.uniform(zmin, zmax, ncentres)
