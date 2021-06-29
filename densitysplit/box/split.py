@@ -113,9 +113,14 @@ def filtered_density(
 
 
 def split_centres(
-  centres_filename, filter_filename, quantiles,
-  handle=None, output_format='unformatted'
+    centres_filename, filter_filename, quantiles,
+    handle=None, output_format='unformatted'
 ):
+
+  # check if files exist
+  for filename in [centres_filename, filter_filename]:
+    if not path.isfile(filename):
+      raise FileNotFoundError(f'{filename} does not exist.')
 
   # read centres
   # first check if this is a numpy file
