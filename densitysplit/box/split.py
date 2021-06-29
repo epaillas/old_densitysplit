@@ -40,6 +40,9 @@ def generate_centres(
       y = np.random.uniform(ymin, ymax, ncentres)
       z = np.random.uniform(zmin, zmax, ncentres)
       centres = np.c_[x, y, z]
+      if len(centres) == 0:
+          raise RunTimeError('Catalogue of random points is empty. '
+                  'Check the boundary coordinates (xmin, xmax...).')
   else:
       sys.exit('Sampling type not recognized')
 
