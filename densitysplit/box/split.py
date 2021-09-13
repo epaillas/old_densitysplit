@@ -70,54 +70,58 @@ def generate_centres(
   
 
 def filtered_density(
-  centres_filename, tracers_filename, output_filename,
-  filter_type, filter_size, ngrid, box_size,
-  nthreads=1, dim1_min=0, dim1_max=None,
-  output_format='unformatted'
+    centres_filename, tracers_filename, output_filename,
+    filter_type, filter_size, ngrid, box_size,
+    nthreads=1, dim1_min=0, dim1_max=None,
+    output_format='unformatted', tracers_fileformat='unformatted',
+    use_weights=False
 ):
 
-  # check if files exist
-  if not path.isfile(centres_filename):
-    raise FileNotFoundError(f'{centres_filename} does not exist.')
+    # check if files exist
+    if not path.isfile(centres_filename):
+        raise FileNotFoundError(f'{centres_filename} does not exist.')
+    if not path.isfile(tracers_filename):
+        raise FileNotFoundError(f'{tracers_filename} does not exist.')
 
-  if not path.isfile(tracers_filename):
-    raise FileNotFoundError(f'{tracers_filename} does not exist.')
-
-
-  if dim1_max == None:
-    if filter_type == 'tophat':
+    if dim1_max == None:
+        if filter_type == 'tophat':
             dim1_max = filter_size
-    elif filter_type == 'gaussian':
+        elif filter_type == 'gaussian':
             dim1_max = 5 * filter_size
 
-  binpath = path.join(path.dirname(__file__),
+    if use_weights is True:
+        use_weights = 1
+    else:
+        use_weights = 0
+
+    binpath = path.join(path.dirname(__file__),
     'bin', '{}_filter.exe'.format(filter_type))
 
-  cmd = [
-    binpath, centres_filename, tracers_filename,
-    output_filename, str(box_size), str(dim1_min),
-    str(dim1_max), str(filter_size), str(ngrid),
-    str(nthreads)
-  ]
+    cmd = [
+        binpath, centres_filename, tracers_filename,
+        output_filename, str(box_size), str(dim1_min),
+        str(dim1_max), str(filter_size), str(ngrid),
+        str(nthreads), str(use_weights), tracers_fileformat
+    ]
 
-  subprocess.call(cmd)
+    subprocess.call(cmd)
 
-  # open filter file
-  f = FortranFile(output_filename, 'r')
-  smoothed_delta = f.read_ints()[0]
-  smoothed_delta = f.read_reals(dtype=np.float64)
-  f.close()
+    # open filter file
+    f = FortranFile(output_filename, 'r')
+    smoothed_delta = f.read_ints()[0]
+    smoothed_delta = f.read_reals(dtype=np.float64)
+    f.close()
 
-  if output_format != 'unformatted':
-    if output_format == 'npy':
-      subprocess.call(['rm', output_filename])
-      np.save(output_filename, smoothed_delta)
+    if output_format != 'unformatted':
+        if output_format == 'npy':
+            subprocess.call(['rm', output_filename])
+            np.save(output_filename, smoothed_delta)
     elif output_format == 'ascii':
-      np.savetxt(output_filename, smoothed_delta)
+        np.savetxt(output_filename, smoothed_delta)
     else:
-      print('Output format not recognized. Using unformatted F90 file.')
-  
-  return smoothed_delta
+        print('Output format not recognized. Using unformatted F90 file.')
+
+    return smoothed_delta
 
 
 def split_centres(

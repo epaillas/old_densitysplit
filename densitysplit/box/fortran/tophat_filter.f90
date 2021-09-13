@@ -13,7 +13,7 @@ program tophat_filter
   integer*8 :: ndata2, ndata1
   integer*8 :: i, ii, ix, iy, iz, ix2, iy2, iz2
   integer*8 :: ipx, ipy, ipz, ndif, ngrid
-  integer*4 :: nthreads
+  integer*4 :: nthreads, use_weights
   
   integer*8, dimension(:, :, :), allocatable :: lirst
   integer*8, dimension(:), allocatable :: ll
@@ -21,16 +21,16 @@ program tophat_filter
   real*8, allocatable, dimension(:,:)  :: data2, data1
   real*8, dimension(:), allocatable :: D1D2, delta, weight1, weight2
 
-  logical :: has_velocity1 = .false., has_velocity2 = .false.
-  
+  logical :: has_velocity1, has_velocity2
+
   character(20), external :: str
   character(len=500) :: data_filename2, data_filename1, output_filename
   character(len=10) :: dim1_max_char, dim1_min_char
   character(len=10) :: boxsize_char, rfilter_char, nthreads_char
-  character(len=10) :: ngrid_char
+  character(len=10) :: ngrid_char, use_weights_char, tracers_fileformat
 
 
-  if (iargc() .lt. 9) then
+  if (iargc() .lt. 11) then
       write(*,*) 'Some arguments are missing.'
       write(*,*) '1) data_filename1'
       write(*,*) '2) data_filename2'
@@ -41,52 +41,53 @@ program tophat_filter
       write(*,*) '7) rfilter'
       write(*,*) '8) ngrid'
       write(*,*) '9) nthreads'
+      write(*,*) '10) use_weights'
+      write(*,*) '11) tracers_fileformat'
       write(*,*) ''
       stop
     end if
     
-  call get_command_argument(number=1, value=data_filename1)
-  call get_command_argument(number=2, value=data_filename2)
-  call get_command_argument(number=3, value=output_filename)
-  call get_command_argument(number=4, value=boxsize_char)
-  call get_command_argument(number=5, value=dim1_min_char)
-  call get_command_argument(number=6, value=dim1_max_char)
-  call get_command_argument(number=7, value=rfilter_char)
-  call get_command_argument(number=8, value=ngrid_char)
-  call get_command_argument(number=9, value=nthreads_char)
+    call getarg(1, data_filename1)
+    call getarg(2, data_filename2)
+    call getarg(3, output_filename)
+    call getarg(4, boxsize_char)
+    call getarg(5, dim1_min_char)
+    call getarg(6, dim1_max_char)
+    call getarg(7, rfilter_char)
+    call getarg(8, ngrid_char)
+    call getarg(9, nthreads_char)
+    call getarg(10, use_weights_char)
+    call getarg(11, tracers_fileformat)
   
-  read(boxsize_char, *) boxsize
-  read(dim1_min_char, *) dim1_min
-  read(dim1_max_char, *) dim1_max
-  read(rfilter_char, *) rfilter
-  read(ngrid_char, *) ngrid
-  read(nthreads_char, *) nthreads
+    read(boxsize_char, *) boxsize
+    read(dim1_min_char, *) dim1_min
+    read(dim1_max_char, *) dim1_max
+    read(rfilter_char, *) rfilter
+    read(ngrid_char, *) ngrid
+    read(nthreads_char, *) nthreads
+    read(use_weights_char, *) use_weights
 
-  write(*,*) '-----------------------'
-  write(*,*) 'Running tophat_filter.exe'
-  write(*,*) 'input parameters:'
-  write(*,*) ''
-  write(*, *) 'data_filename1: ', trim(data_filename1)
-  write(*, *) 'data_filename2: ', trim(data_filename2)
-  write(*, *) 'boxsize: ', trim(boxsize_char)
-  write(*, *) 'output_filename: ', trim(output_filename)
-  write(*, *) 'dim1_min: ', trim(dim1_min_char), ' Mpc'
-  write(*, *) 'dim1_max: ', trim(dim1_max_char), ' Mpc'
-  write(*, *) 'rfilter: ', trim(rfilter_char), 'Mpc'
-  write(*, *) 'ngrid: ', trim(ngrid_char)
-  write(*, *) 'nthreads: ', trim(nthreads_char)
-  write(*,*) ''
+    ! read tracers file
+    if (trim(tracers_fileformat) == 'ascii') then
+        if (use_weights == 1) then
+            call read_catalogue_type2(data_filename1, data1, weight1, ndata1, has_velocity1)
+            call read_catalogue_type2(data_filename2, data2, weight2, ndata2, has_velocity2)
+        else
+            call read_catalogue_type1(data_filename1, data1, weight1, ndata1, has_velocity1)
+            call read_catalogue_type1(data_filename2, data2, weight2, ndata2, has_velocity2)
+        end if
+    else
+        if (use_weights == 1) then
+            call read_catalogue_type6(data_filename1, data1, weight1, ndata1, has_velocity1)
+            call read_catalogue_type6(data_filename2, data2, weight2, ndata2, has_velocity2)
+        else
+            call read_catalogue_type5(data_filename1, data1, weight1, ndata1, has_velocity1)
+            call read_catalogue_type5(data_filename2, data2, weight2, ndata2, has_velocity2)
+        end if
+    end if
 
-  call read_unformatted(data_filename1, data1, weight1, ndata1, has_velocity1)
-  call read_unformatted(data_filename2, data2, weight2, ndata2, has_velocity2)
   call linked_list(data2, boxsize, ngrid, ll, lirst, rgrid)
 
-  write(*,*) 'ndata1 dim: ', size(data1, dim=1), size(data1, dim=2)
-  write(*,*) 'data1(min, max) = ', minval(data1(:,:)), maxval(data1(:,:))
-  write(*,*) 'weight1(min, max) = ', minval(weight1), maxval(weight1)
-  write(*,*) 'ndata2 dim: ', size(data2, dim=1), size(data2, dim=2)
-  write(*,*) 'data2(min, max) = ', minval(data2(1,:)), maxval(data2(1,:))
-  write(*,*) 'weight2(min, max) = ', minval(weight2), maxval(weight2)
 
   allocate(D1D2(ndata1))
   allocate(delta(ndata1))
